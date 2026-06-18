@@ -1,1 +1,1 @@
-# Smart-Automated-Car-Wash-Management-System
+# Smart Automated Car Wash Management System
