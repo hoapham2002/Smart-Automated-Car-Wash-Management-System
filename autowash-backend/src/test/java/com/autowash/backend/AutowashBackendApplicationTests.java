@@ -1,4 +1,4 @@
-package com.autowash.autowash.backend;
+package com.autowash.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
