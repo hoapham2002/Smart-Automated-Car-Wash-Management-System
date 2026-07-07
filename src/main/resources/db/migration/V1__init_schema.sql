@@ -8,20 +8,20 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- ============================================================
---  ENUMS
+--  ENUMS (Tất cả đã được chuyển sang CHỮ HOA)
 -- ============================================================
-CREATE TYPE user_role          AS ENUM ('customer','staff','admin');
-CREATE TYPE vehicle_size       AS ENUM ('motorbike','scooter','sport_bike','electric_bike');
-CREATE TYPE booking_status     AS ENUM ('pending','confirmed','checked_in','in_progress','completed','cancelled','no_show');
-CREATE TYPE wash_status        AS ENUM ('queued','washing','drying','done','issue_found');
-CREATE TYPE payment_status     AS ENUM ('pending','paid','cancelled');
-CREATE TYPE payment_method     AS ENUM ('cash','transfer');          -- no online payment per spec
-CREATE TYPE loyalty_tier       AS ENUM ('member','silver','gold','platinum');
-CREATE TYPE loyalty_tx_type    AS ENUM ('earn','redeem','expire','adjust','bonus');
-CREATE TYPE redemption_type    AS ENUM ('discount','free_wash','addon');
-CREATE TYPE promo_target       AS ENUM ('all','member','silver','gold','platinum');
-CREATE TYPE promo_type         AS ENUM ('bonus_points','discount_pct','free_wash','double_points');
-CREATE TYPE survey_channel     AS ENUM ('facebook','tiktok','group','onsite','app');
+CREATE TYPE user_role          AS ENUM ('CUSTOMER','STAFF','ADMIN');
+CREATE TYPE vehicle_size       AS ENUM ('MOTORBIKE','SCOOTER','SPORT_BIKE','ELECTRIC_BIKE');
+CREATE TYPE booking_status     AS ENUM ('PENDING','CONFIRMED','CHECKED_IN','IN_PROGRESS','COMPLETED','CANCELLED','NO_SHOW');
+CREATE TYPE wash_status        AS ENUM ('QUEUED','WASHING','DRYING','DONE','ISSUE_FOUND');
+CREATE TYPE payment_status     AS ENUM ('PENDING','PAID','CANCELLED');
+CREATE TYPE payment_method     AS ENUM ('CASH','TRANSFER');          -- no online payment per spec
+CREATE TYPE loyalty_tier       AS ENUM ('MEMBER','SILVER','GOLD','PLATINUM');
+CREATE TYPE loyalty_tx_type    AS ENUM ('EARN','REDEEM','EXPIRE','ADJUST','BONUS');
+CREATE TYPE redemption_type    AS ENUM ('DISCOUNT','FREE_WASH','ADDON');
+CREATE TYPE promo_target       AS ENUM ('ALL','MEMBER','SILVER','GOLD','PLATINUM');
+CREATE TYPE promo_type         AS ENUM ('BONUS_POINTS','DISCOUNT_PCT','FREE_WASH','DOUBLE_POINTS');
+CREATE TYPE survey_channel     AS ENUM ('FACEBOOK','TIKTOK','GROUP','ONSITE','APP');
 
 -- ============================================================
 --  SEQUENCES
@@ -34,19 +34,19 @@ CREATE SEQUENCE tier_review_seq START 1;
 --  1. USERS
 -- ============================================================
 CREATE TABLE users (
-    id              UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
-    phone           VARCHAR(15)  NOT NULL,
-    email           VARCHAR(120),
-    full_name       VARCHAR(120) NOT NULL,
-    password_hash   TEXT         NOT NULL,
-    role            user_role    NOT NULL DEFAULT 'customer',
-    date_of_birth   DATE,
-    gender          VARCHAR(10),
-    occupation      VARCHAR(80),
+    id                  UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
+    phone               VARCHAR(15)  NOT NULL,
+    email               VARCHAR(120),
+    full_name           VARCHAR(120) NOT NULL,
+    password_hash       TEXT         NOT NULL,
+    role                user_role    NOT NULL DEFAULT 'CUSTOMER',
+    date_of_birth       DATE,
+    gender              VARCHAR(10),
+    occupation          VARCHAR(80),
     acquisition_channel VARCHAR(50),
-    is_active       BOOLEAN      NOT NULL DEFAULT TRUE,
-    created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    is_active           BOOLEAN      NOT NULL DEFAULT TRUE,
+    created_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     CONSTRAINT uq_users_phone UNIQUE (phone),
     CONSTRAINT uq_users_email UNIQUE (email),
     CONSTRAINT chk_users_phone CHECK (phone ~ '^0[0-9]{9,10}$')
@@ -62,7 +62,7 @@ CREATE TABLE vehicles (
     owner_id         UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     plate_number     VARCHAR(20)  NOT NULL,
     plate_normalized VARCHAR(20)  NOT NULL,
-    vehicle_size     vehicle_size NOT NULL DEFAULT 'motorbike',
+    vehicle_size     vehicle_size NOT NULL DEFAULT 'MOTORBIKE',
     brand            VARCHAR(60),
     model            VARCHAR(60),
     color            VARCHAR(40),
@@ -97,10 +97,10 @@ CREATE TABLE tier_configs (
 );
 
 INSERT INTO tier_configs VALUES
-    ('member',   0,    0,  7,  1, 1.00, 0,   500, 'Thành viên cơ bản'),
-    ('silver',   500,  5,  10, 2, 1.25, 50,  450, 'Thành viên Bạc – 10 ngày đặt trước'),
-    ('gold',     2000, 15, 12, 3, 1.50, 100, 400, 'Thành viên Vàng – 12 ngày đặt trước'),
-    ('platinum', 5000, 30, 14, 4, 2.00, 200, 350, 'Thành viên Bạch Kim – ưu tiên tuyệt đối');
+    ('MEMBER',   0,    0,  7,  1, 1.00, 0,   500, 'Thành viên cơ bản'),
+    ('SILVER',   500,  5,  10, 2, 1.25, 50,  450, 'Thành viên Bạc – 10 ngày đặt trước'),
+    ('GOLD',     2000, 15, 12, 3, 1.50, 100, 400, 'Thành viên Vàng – 12 ngày đặt trước'),
+    ('PLATINUM', 5000, 30, 14, 4, 2.00, 200, 350, 'Thành viên Bạch Kim – ưu tiên tuyệt đối');
 
 -- ============================================================
 --  4. LOYALTY ACCOUNTS
@@ -108,7 +108,7 @@ INSERT INTO tier_configs VALUES
 CREATE TABLE loyalty_accounts (
     id                  UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id             UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    current_tier        loyalty_tier NOT NULL DEFAULT 'member',
+    current_tier        loyalty_tier NOT NULL DEFAULT 'MEMBER',
     points_balance      INT          NOT NULL DEFAULT 0,
     points_ytd          INT          NOT NULL DEFAULT 0,
     total_points_earned INT          NOT NULL DEFAULT 0,
@@ -182,13 +182,13 @@ CREATE TABLE service_prices (
 --  7. BOOKING SLOTS
 -- ============================================================
 CREATE TABLE booking_slots (
-    id              UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
-    slot_date       DATE    NOT NULL,
-    slot_start      TIME    NOT NULL,
-    slot_end        TIME    NOT NULL,
-    capacity        INT     NOT NULL DEFAULT 3,
-    booked_count    INT     NOT NULL DEFAULT 0,
-    is_blocked      BOOLEAN NOT NULL DEFAULT FALSE,
+    id           UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
+    slot_date    DATE    NOT NULL,
+    slot_start   TIME    NOT NULL,
+    slot_end     TIME    NOT NULL,
+    capacity     INT     NOT NULL DEFAULT 3,
+    booked_count INT     NOT NULL DEFAULT 0,
+    is_blocked   BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT uq_slot           UNIQUE (slot_date, slot_start),
     CONSTRAINT chk_slot_times    CHECK (slot_end > slot_start),
     CONSTRAINT chk_slot_count    CHECK (booked_count >= 0),
@@ -209,9 +209,9 @@ CREATE TABLE bookings (
     vehicle_id       UUID           NOT NULL REFERENCES vehicles(id),
     service_id       UUID           NOT NULL REFERENCES services(id),
     slot_id          UUID           REFERENCES booking_slots(id),
-    status           booking_status NOT NULL DEFAULT 'pending',
+    status           booking_status NOT NULL DEFAULT 'PENDING',
     is_walkin        BOOLEAN        NOT NULL DEFAULT FALSE,
-    tier_at_booking  loyalty_tier   NOT NULL DEFAULT 'member',
+    tier_at_booking  loyalty_tier   NOT NULL DEFAULT 'MEMBER',
     queue_priority   INT            NOT NULL DEFAULT 1,
     scheduled_at     TIMESTAMPTZ,
     checked_in_at    TIMESTAMPTZ,
@@ -254,7 +254,7 @@ CREATE TABLE wash_sessions (
     booking_id     UUID        NOT NULL REFERENCES bookings(id),
     bay_number     INT,
     assigned_staff UUID        REFERENCES users(id),
-    status         wash_status NOT NULL DEFAULT 'queued',
+    status         wash_status NOT NULL DEFAULT 'QUEUED',
     started_at     TIMESTAMPTZ,
     completed_at   TIMESTAMPTZ,
     quality_score  NUMERIC(3,1),
@@ -279,7 +279,7 @@ CREATE TABLE invoices (
     subtotal        NUMERIC(12,0)  NOT NULL,
     discount_amount NUMERIC(12,0)  NOT NULL DEFAULT 0,
     total_amount    NUMERIC(12,0)  NOT NULL,
-    status          payment_status NOT NULL DEFAULT 'pending',
+    status          payment_status NOT NULL DEFAULT 'PENDING',
     paid_at         TIMESTAMPTZ,
     created_at      TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
     CONSTRAINT uq_invoice_code     UNIQUE (invoice_code),
@@ -292,7 +292,7 @@ CREATE TABLE payments (
     invoice_id   UUID           NOT NULL REFERENCES invoices(id),
     amount       NUMERIC(12,0)  NOT NULL,
     method       payment_method NOT NULL,
-    status       payment_status NOT NULL DEFAULT 'pending',
+    status       payment_status NOT NULL DEFAULT 'PENDING',
     note         TEXT,
     processed_at TIMESTAMPTZ,
     created_at   TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
@@ -306,25 +306,25 @@ CREATE INDEX idx_payments_invoice  ON payments(invoice_id);
 -- 11. PROMOTIONS
 -- ============================================================
 CREATE TABLE promotions (
-    id              UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
-    code            VARCHAR(30)  UNIQUE,
-    name            VARCHAR(120) NOT NULL,
-    description     TEXT,
-    promo_type      promo_type   NOT NULL,
-    target_tier     promo_target NOT NULL DEFAULT 'all',
-    discount_pct    NUMERIC(5,2),
-    bonus_points    INT,
-    multiplier      NUMERIC(4,2),
-    min_spend       NUMERIC(12,0) NOT NULL DEFAULT 0,
-    min_visits      INT           NOT NULL DEFAULT 0,
+    id                UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
+    code              VARCHAR(30)  UNIQUE,
+    name              VARCHAR(120) NOT NULL,
+    description       TEXT,
+    promo_type        promo_type   NOT NULL,
+    target_tier       promo_target NOT NULL DEFAULT 'ALL',
+    discount_pct      NUMERIC(5,2),
+    bonus_points      INT,
+    multiplier        NUMERIC(4,2),
+    min_spend         NUMERIC(12,0) NOT NULL DEFAULT 0,
+    min_visits        INT           NOT NULL DEFAULT 0,
     usage_limit_total INT,
     usage_limit_per_user INT DEFAULT 1,
-    used_count      INT           NOT NULL DEFAULT 0,
-    valid_from      TIMESTAMPTZ   NOT NULL,
-    valid_to        TIMESTAMPTZ   NOT NULL,
-    is_active       BOOLEAN       NOT NULL DEFAULT TRUE,
-    created_by      UUID          REFERENCES users(id),
-    created_at      TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    used_count        INT           NOT NULL DEFAULT 0,
+    valid_from        TIMESTAMPTZ   NOT NULL,
+    valid_to          TIMESTAMPTZ   NOT NULL,
+    is_active         BOOLEAN       NOT NULL DEFAULT TRUE,
+    created_by        UUID          REFERENCES users(id),
+    created_at        TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
     CONSTRAINT chk_promo_dates    CHECK (valid_to > valid_from),
     CONSTRAINT chk_promo_discount CHECK (discount_pct IS NULL OR discount_pct BETWEEN 0.01 AND 100),
     CONSTRAINT chk_promo_bonus    CHECK (bonus_points IS NULL OR bonus_points > 0),
@@ -334,12 +334,12 @@ CREATE TABLE promotions (
 CREATE INDEX idx_promos_active ON promotions(valid_from, valid_to, target_tier) WHERE is_active = TRUE;
 
 CREATE TABLE promotion_usages (
-    id           UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
-    promo_id     UUID        NOT NULL REFERENCES promotions(id),
-    user_id      UUID        NOT NULL REFERENCES users(id),
-    booking_id   UUID        NOT NULL REFERENCES bookings(id),
+    id            UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+    promo_id      UUID        NOT NULL REFERENCES promotions(id),
+    user_id       UUID        NOT NULL REFERENCES users(id),
+    booking_id    UUID        NOT NULL REFERENCES bookings(id),
     benefit_value NUMERIC(12,0),
-    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT uq_promo_user_booking UNIQUE (promo_id, booking_id)
 );
 
@@ -357,7 +357,7 @@ CREATE TABLE redemption_options (
     points_required INT             NOT NULL,
     discount_value  NUMERIC(12,0),
     service_id      UUID            REFERENCES services(id),
-    min_tier        loyalty_tier    NOT NULL DEFAULT 'member',
+    min_tier        loyalty_tier    NOT NULL DEFAULT 'MEMBER',
     is_active       BOOLEAN         NOT NULL DEFAULT TRUE,
     CONSTRAINT chk_redemption_points CHECK (points_required > 0)
 );
@@ -366,13 +366,13 @@ CREATE TABLE redemption_options (
 -- 13. POINT EXPIRY BATCHES
 -- ============================================================
 CREATE TABLE point_expiry_batches (
-    id              UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
-    account_id      UUID        NOT NULL REFERENCES loyalty_accounts(id),
-    points_original INT         NOT NULL,
-    points_remaining INT        NOT NULL,
-    earned_at       TIMESTAMPTZ NOT NULL,
-    expires_at      DATE        NOT NULL,
-    is_expired      BOOLEAN     NOT NULL DEFAULT FALSE,
+    id               UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+    account_id       UUID        NOT NULL REFERENCES loyalty_accounts(id),
+    points_original  INT         NOT NULL,
+    points_remaining INT         NOT NULL,
+    earned_at        TIMESTAMPTZ NOT NULL,
+    expires_at       DATE        NOT NULL,
+    is_expired       BOOLEAN     NOT NULL DEFAULT FALSE,
     CONSTRAINT chk_expiry_points CHECK (points_remaining >= 0 AND points_remaining <= points_original)
 );
 
@@ -383,9 +383,9 @@ CREATE INDEX idx_expiry_date    ON point_expiry_batches(expires_at) WHERE is_exp
 -- 14. SURVEY & RESEARCH DATA
 -- ============================================================
 CREATE TABLE survey_responses (
-    id                  UUID           PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id             UUID           REFERENCES users(id),
-    channel             survey_channel NOT NULL,
+    id                                  UUID           PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id                             UUID           REFERENCES users(id),
+    channel                             survey_channel NOT NULL,
     q_loyalty_program_importance  SMALLINT,
     q_tier_upgrade_motivation     SMALLINT,
     q_booking_convenience         SMALLINT,
