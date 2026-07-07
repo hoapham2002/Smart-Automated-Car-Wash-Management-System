@@ -35,7 +35,7 @@ public class User implements UserDetails {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "phone", nullable = false, unique = true, length = 15)
+    @Column(name = "phone", nullable = false, unique = true, length = 10)
     private String phone;
 
     @Column(name = "email", unique = true, length = 120)
