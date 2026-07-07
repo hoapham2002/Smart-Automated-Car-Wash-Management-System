@@ -27,22 +27,22 @@ SELECT
     tc.birthday_bonus_pts,
     -- Điểm còn thiếu để lên tier tiếp theo
     CASE la.current_tier
-        WHEN 'member'   THEN GREATEST(500  - la.points_ytd, 0)
-        WHEN 'silver'   THEN GREATEST(2000 - la.points_ytd, 0)
-        WHEN 'gold'     THEN GREATEST(5000 - la.points_ytd, 0)
+        WHEN 'MEMBER'   THEN GREATEST(500  - la.points_ytd, 0)
+        WHEN 'SILVER'   THEN GREATEST(2000 - la.points_ytd, 0)
+        WHEN 'GOLD'     THEN GREATEST(5000 - la.points_ytd, 0)
         ELSE NULL
     END AS points_to_next_tier,
     -- Tên tier tiếp theo
     CASE la.current_tier
-        WHEN 'member'   THEN 'silver'
-        WHEN 'silver'   THEN 'gold'
-        WHEN 'gold'     THEN 'platinum'
+        WHEN 'MEMBER'   THEN 'SILVER'
+        WHEN 'SILVER'   THEN 'GOLD'
+        WHEN 'GOLD'     THEN 'PLATINUM'
         ELSE NULL
     END AS next_tier
 FROM users u
 JOIN loyalty_accounts la ON la.user_id = u.id
 JOIN tier_configs     tc ON tc.tier    = la.current_tier
-WHERE u.role = 'customer';
+WHERE u.role = 'CUSTOMER';
 
 -- ── V2. v_wash_queue ─────────────────────────────────────
 -- Dùng cho: GET /wash/queue (staff/admin màn hình xưởng)
@@ -78,7 +78,7 @@ JOIN vehicles       v  ON v.id       = bk.vehicle_id
 JOIN services       s  ON s.id       = bk.service_id
 JOIN users          u  ON u.id       = bk.customer_id
 JOIN loyalty_accounts la ON la.user_id = u.id
-WHERE ws.status NOT IN ('done')
+WHERE ws.status NOT IN ('DONE')
 ORDER BY queue_pos;
 
 -- ── V3. v_admin_kpi ──────────────────────────────────────
@@ -90,33 +90,33 @@ SELECT
         THEN b.id END)                                   AS today_bookings,
 
     COUNT(DISTINCT CASE
-        WHEN b.status = 'completed'
+        WHEN b.status = 'COMPLETED'
          AND b.completed_at::DATE = CURRENT_DATE
         THEN b.id END)                                   AS today_completed,
 
     COALESCE(SUM(CASE
         WHEN i.paid_at::DATE = CURRENT_DATE
-         AND i.status = 'paid'
+         AND i.status = 'PAID'
         THEN i.total_amount END), 0)                     AS today_revenue,
 
     COUNT(DISTINCT CASE
-        WHEN la.current_tier = 'platinum'
+        WHEN la.current_tier = 'PLATINUM'
         THEN la.user_id END)                             AS platinum_members,
 
     COUNT(DISTINCT CASE
-        WHEN la.current_tier = 'gold'
+        WHEN la.current_tier = 'GOLD'
         THEN la.user_id END)                             AS gold_members,
 
     COUNT(DISTINCT CASE
-        WHEN la.current_tier = 'silver'
+        WHEN la.current_tier = 'SILVER'
         THEN la.user_id END)                             AS silver_members,
 
     COUNT(DISTINCT CASE
-        WHEN la.current_tier = 'member'
+        WHEN la.current_tier = 'MEMBER'
         THEN la.user_id END)                             AS member_count,
 
     COUNT(DISTINCT CASE
-        WHEN ws.status NOT IN ('done')
+        WHEN ws.status NOT IN ('DONE')
         THEN ws.id END)                                  AS active_washes
 
 FROM bookings b
@@ -134,13 +134,13 @@ SELECT
     SUM(i.discount_amount)                           AS total_discounts,
     SUM(i.total_amount - i.discount_amount)          AS net_revenue,
     ROUND(AVG(i.total_amount), 0)                    AS avg_order_value,
-    COUNT(*) FILTER (WHERE p.method = 'cash')        AS cash_count,
-    COUNT(*) FILTER (WHERE p.method = 'transfer')    AS transfer_count
+    COUNT(*) FILTER (WHERE p.method = 'CASH')        AS cash_count,
+    COUNT(*) FILTER (WHERE p.method = 'TRANSFER')    AS transfer_count
 FROM invoices i
 JOIN bookings bk ON bk.id       = i.booking_id
 LEFT JOIN payments p ON p.invoice_id = i.id
-              AND p.status = 'paid'
-WHERE i.status        = 'paid'
+              AND p.status = 'PAID'
+WHERE i.status        = 'PAID'
   AND bk.completed_at IS NOT NULL
 GROUP BY DATE(bk.completed_at)
 ORDER BY revenue_date DESC;
@@ -189,4 +189,4 @@ JOIN services         s  ON s.id        = b.service_id
 JOIN vehicles         v  ON v.id        = b.vehicle_id
 LEFT JOIN wash_sessions  ws ON ws.booking_id = b.id
 LEFT JOIN survey_responses sr ON sr.user_id  = u.id
-WHERE b.status = 'completed';
+WHERE b.status = 'COMPLETED';

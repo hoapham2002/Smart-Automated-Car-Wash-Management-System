@@ -60,7 +60,7 @@ BEGIN
                 UPDATE booking_slots SET booked_count = booked_count + 1 WHERE id = NEW.slot_id;
             END IF;
         END IF;
-        IF OLD.status NOT IN ('cancelled','no_show') AND NEW.status IN ('cancelled','no_show')
+        IF OLD.status NOT IN ('CANCELLED','NO_SHOW') AND NEW.status IN ('CANCELLED','NO_SHOW')
            AND NEW.slot_id IS NOT NULL THEN
             UPDATE booking_slots SET booked_count = GREATEST(booked_count-1,0) WHERE id = NEW.slot_id;
         END IF;
@@ -87,7 +87,7 @@ DECLARE
 BEGIN
     SELECT current_tier INTO v_tier
     FROM loyalty_accounts WHERE user_id = NEW.customer_id;
-    v_tier := COALESCE(v_tier, 'member');
+    v_tier := COALESCE(v_tier, 'MEMBER');
     NEW.tier_at_booking := v_tier;
 
     IF NEW.scheduled_at IS NOT NULL AND NOT NEW.is_walkin THEN
@@ -128,7 +128,7 @@ CREATE TRIGGER trg_check_booking_rules
 CREATE OR REPLACE FUNCTION fn_init_loyalty()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
-    IF NEW.role = 'customer' THEN
+    IF NEW.role = 'CUSTOMER' THEN
         INSERT INTO loyalty_accounts (user_id, next_review_at)
         VALUES (NEW.id, DATE_TRUNC('month', NOW() + INTERVAL '1 month')::DATE)
         ON CONFLICT (user_id) DO NOTHING;
@@ -191,14 +191,14 @@ BEGIN
     SELECT * INTO v_cfg FROM tier_configs      WHERE tier    = v_acc.current_tier;
 
     IF NOT FOUND THEN RETURN 0; END IF;
-    IF v_bk.status <> 'completed' THEN RETURN 0; END IF;
+    IF v_bk.status <> 'COMPLETED' THEN RETURN 0; END IF;
 
     v_pts_base := FLOOR(v_bk.final_price / 1000)::INT + v_svc.base_points;
     v_multiplier := v_cfg.point_multiplier;
 
     IF v_bk.used_promo_id IS NOT NULL THEN
         SELECT * INTO v_promo FROM promotions WHERE id = v_bk.used_promo_id;
-        IF v_promo.promo_type = 'double_points' THEN
+        IF v_promo.promo_type = 'DOUBLE_POINTS' THEN
             v_multiplier := v_multiplier * COALESCE(v_promo.multiplier, 2.0);
         END IF;
     END IF;
@@ -220,7 +220,7 @@ BEGIN
         (account_id, booking_id, tx_type, points, balance_after,
          multiplier_used, promo_id, note, expires_at)
     VALUES
-        (v_acc.id, p_booking_id, 'earn', v_pts_final,
+        (v_acc.id, p_booking_id, 'EARN', v_pts_final,
          v_acc.points_balance + v_pts_final,
          v_multiplier, v_bk.used_promo_id,
          'Tích điểm từ ' || v_bk.booking_code,
@@ -284,7 +284,7 @@ BEGIN
     INSERT INTO loyalty_transactions
         (account_id, booking_id, tx_type, points, balance_after, note)
     VALUES
-        (v_acc.id, p_booking_id, 'redeem',
+        (v_acc.id, p_booking_id, 'REDEEM',
          -v_opt.points_required,
          v_acc.points_balance - v_opt.points_required,
          'Đổi điểm: ' || v_opt.name);
@@ -320,7 +320,7 @@ BEGIN
         ORDER BY min_points DESC
         LIMIT 1;
 
-        v_new_tier := COALESCE(v_new_tier, 'member');
+        v_new_tier := COALESCE(v_new_tier, 'MEMBER');
 
         IF v_new_tier <> v_account.current_tier THEN
             INSERT INTO tier_history
@@ -379,7 +379,7 @@ BEGIN
         INSERT INTO loyalty_transactions
             (account_id, tx_type, points, balance_after, note)
         VALUES
-            (v_batch.account_id, 'expire', -v_batch.points_remaining,
+            (v_batch.account_id, 'EXPIRE', -v_batch.points_remaining,
              GREATEST(v_acc.points_balance - v_batch.points_remaining, 0),
              'Điểm hết hạn (batch ' || v_batch.id || ')');
 
