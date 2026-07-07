@@ -33,3 +33,22 @@ build/
 .vscode/
 .env
 application-local.yml
+
+# Build
+target/
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+
+# Env – KHÔNG commit file này, chỉ commit .env.example
+.env
+
+# OS
+.DS_Store
+Thumbs.db
