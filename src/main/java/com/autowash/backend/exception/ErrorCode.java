@@ -50,6 +50,7 @@ public final class ErrorCode {
 
     // Auth (A01-A04)
     public static final String PHONE_ALREADY_EXISTS = "PHONE_ALREADY_EXISTS";
+    public static final String EMAIL_ALREADY_EXISTS = "EMAIL_ALREADY_EXISTS";
     public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
     public static final String INVALID_REFRESH_TOKEN = "INVALID_REFRESH_TOKEN";
     public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
@@ -57,4 +58,13 @@ public final class ErrorCode {
     // Vehicle (A05-A06)
     public static final String PLATE_ALREADY_EXISTS = "PLATE_ALREADY_EXISTS";
     public static final String VEHICLE_NOT_FOUND = "VEHICLE_NOT_FOUND";
+
+    // Service catalog / Booking (A07-A11)
+    public static final String SERVICE_NOT_FOUND = "SERVICE_NOT_FOUND";
+    public static final String PRICE_NOT_FOUND = "PRICE_NOT_FOUND";
+    public static final String BOOKING_NOT_FOUND = "BOOKING_NOT_FOUND";
+    public static final String CANNOT_CANCEL = "CANNOT_CANCEL";
+
+    // Research (D02)
+    public static final String SURVEY_NOT_FOUND = "SURVEY_NOT_FOUND";
 }
