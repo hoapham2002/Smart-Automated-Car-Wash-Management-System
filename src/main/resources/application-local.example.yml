@@ -1,8 +1,0 @@
-spring:
-  datasource:
-    url: jdbc:postgresql://your-host:5432/postgres
-    username: your_username
-    password: your_password
-
-jwt:
-  secret: your_jwt_secret
