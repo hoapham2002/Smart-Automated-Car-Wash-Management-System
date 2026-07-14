@@ -1,38 +1,43 @@
 spring:
-  # config:
-    # import: optional:file:.env[.properties]
   application:
-    name: autowash-backend
+    name: autowash-pro
   profiles:
-    active: local
-  datasource:
-    # url: ${DB_URL}
-    # username: ${DB_USERNAME}
-    # password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
+    active: dev
+
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
   flyway:
     enabled: true
     locations: classpath:db/migration
+    schemas: public
     baseline-on-migrate: true
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
 jwt:
-  # secret: ${JWT_SECRET}
-  access-token-expiration: 3600000
-  refresh-token-expiration: 604800000
+  secret: ${JWT_SECRET:MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=}
+  expiration: 86400000
+  refresh-expiration: 604800000
 
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
+resend:
+  api-key: ${RESEND_API_KEY:dummy-key-for-dev}
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
+supabase:
+  url: ${SUPABASE_URL:http://localhost}
+  key: ${SUPABASE_ANON_KEY:dummy-key}
+
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
+
+server:
+  port: 8080

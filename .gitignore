@@ -33,6 +33,11 @@ build/
 .vscode/
 .env
 application-local.yml
+application-dev.yaml
+
+# Local config
+src/main/resources/application-dev.yaml
+src/main/resources/application-prod.yaml
 
 # Build
 target/
