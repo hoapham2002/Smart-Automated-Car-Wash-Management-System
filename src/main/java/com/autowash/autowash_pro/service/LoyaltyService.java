@@ -169,7 +169,7 @@ public class LoyaltyService {
     // GET /api/loyalty/balance/{customerId}
     // =========================================================================
 
-    @Transactional(readOnly = true)
+    @Transactional
     public PointBalanceResponse getBalance(UUID customerId, String currentUserPhone) {
         validateCustomerAccess(customerId, currentUserPhone);
         Customer customer = findCustomerById(customerId);
@@ -239,7 +239,7 @@ public class LoyaltyService {
     // GET /api/customers/{id}/points
     // =========================================================================
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Page<PointHistoryResponse> getPointHistory(UUID customerId,
             Pageable pageable,
             String currentUserPhone) {
