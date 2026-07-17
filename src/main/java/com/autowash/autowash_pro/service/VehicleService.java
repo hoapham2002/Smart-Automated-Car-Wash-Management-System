@@ -66,7 +66,7 @@ public class VehicleService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<VehicleResponse> getMyVehicles(String phone) {
         Customer customer = getCustomer(phone);
         return vehicleRepository

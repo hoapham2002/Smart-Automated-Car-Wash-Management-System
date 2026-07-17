@@ -400,7 +400,7 @@ public class BookingService {
         return mapToResponse(savedBooking);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<BookingResponse> getMyBookings(UserDetails userDetails) {
         Customer customer = findCurrentCustomer(userDetails);
         return bookingRepository
@@ -411,14 +411,14 @@ public class BookingService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public BookingResponse getBooking(UUID bookingId, UserDetails userDetails) {
         Booking booking = findBooking(bookingId);
         assertCanAccess(booking, userDetails);
         return mapToResponse(booking);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<BookingResponse> getAdminBookings(
             BookingStatus status,
             LocalDate date) {
@@ -448,7 +448,7 @@ public class BookingService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<AvailabilitySlotResponse> getAvailability(
             LocalDate date,
             UserDetails userDetails) {

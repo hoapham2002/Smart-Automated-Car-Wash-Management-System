@@ -132,7 +132,7 @@ public class CustomerService {
     }
 
     // Lấy thông tin profile của khách hàng hiện tại theo phone
-    @Transactional(readOnly = true)
+    @Transactional
     public CustomerProfileResponse getMyProfile(String phone) {
         Customer customer = customerRepository.findByPhone(phone)
                 .orElseThrow(() -> new ResourceNotFoundException(
